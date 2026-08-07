@@ -126,17 +126,17 @@ describe("Pages collision preflight", () => {
 });
 
 describe("CloudflareClient", () => {
-  it("requests only the selected OAuth scopes and OS keyring storage", async () => {
+  it("requests only the selected OAuth scopes", async () => {
     const runner = vi.fn<CommandRunner>().mockResolvedValue(commandResult());
     await new CloudflareClient(runner).login();
 
     expect(OAUTH_SCOPES).toContain("workers_scripts:write");
     expect(runner).toHaveBeenCalledWith(
-      expect.stringMatching(/wrangler(?:\.cmd)?$/u),
-      ["login", "--use-keyring", "--scopes", ...OAUTH_SCOPES],
+    expect.stringMatching(/wrangler(?:\.cmd)?$/u),
+      ["login", "--scopes", ...OAUTH_SCOPES],
       expect.objectContaining({interactive: true}),
-    );
-  });
+  );
+});
 
   it("turns OAuth rejection or callback failure into a non-destructive error", async () => {
     const runner = vi.fn<CommandRunner>().mockRejectedValue(
@@ -148,7 +148,7 @@ describe("CloudflareClient", () => {
     );
   });
 
-  it("creates named OAuth profiles in the keyring and activates the repository binding", async () => {
+  it("creates named OAuth profiles and activates the repository binding", async () => {
     const runner = vi.fn<CommandRunner>().mockResolvedValue(commandResult());
     const cloudflare = new CloudflareClient(runner);
 
@@ -160,9 +160,6 @@ describe("CloudflareClient", () => {
       expect.stringMatching(/wrangler(?:\.cmd)?$/u),
       ["auth", "create", "company", "--scopes", ...OAUTH_SCOPES],
       expect.objectContaining({
-        env: expect.objectContaining({
-          CLOUDFLARE_AUTH_USE_KEYRING: "true",
-        }),
         interactive: true,
       }),
     );
@@ -575,7 +572,6 @@ describe("CloudflareClient", () => {
         allowFailure: true,
         env: expect.objectContaining({
           CLOUDFLARE_ACCOUNT_ID: "account-id",
-          CLOUDFLARE_AUTH_USE_KEYRING: "true",
         }),
       }),
     );
