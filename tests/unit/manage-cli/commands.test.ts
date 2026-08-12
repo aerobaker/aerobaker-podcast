@@ -255,7 +255,7 @@ describe("read-only Cloudflare account discovery", () => {
     );
   });
 
-  it("forces browser OAuth with keyring storage when reauthorization is requested", async () => {
+  it("forces browser OAuth when reauthorization is requested", async () => {
     vi.spyOn(process.stdout, "write").mockImplementation(() => true);
     vi.spyOn(process.stderr, "write").mockImplementation(() => true);
     const runner = vi.fn<CommandRunner>(async (_executable, args) => {
@@ -263,9 +263,9 @@ describe("read-only Cloudflare account discovery", () => {
       if (command === "auth list") {
         return {exitCode: 0, stderr: "", stdout: ""};
       }
-      if (command.startsWith("login --use-keyring --scopes ")) {
-        return {exitCode: 0, stderr: "", stdout: "Authorized"};
-      }
+      if (command.startsWith("login --scopes ")) {
+      return {exitCode: 0, stderr: "", stdout: "Authorized"};
+    }
       if (command === "whoami --json") {
         return {
           exitCode: 0,
@@ -292,7 +292,7 @@ describe("read-only Cloudflare account discovery", () => {
     await accountsCommand({json: true, reauthorize: true}, runner);
 
     expect(runner.mock.calls.some(([, args]) =>
-      args[0] === "login" && args.includes("--use-keyring")
+      args[0] === "login"
     )).toBe(true);
   });
 
@@ -353,9 +353,7 @@ describe("read-only Cloudflare account discovery", () => {
       args[0] === "auth" && args[1] === "activate" &&
       args[2] === "company"
     )).toBe(true);
-    expect(runner.mock.calls.some(([, , options]) =>
-      options?.env?.CLOUDFLARE_AUTH_USE_KEYRING === "true"
-    )).toBe(true);
+    // delete the CLOUDFLARE_AUTH_USE_KEYRING check
   });
 
   it("selects an existing named profile without replacing its login", async () => {

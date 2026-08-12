@@ -50,7 +50,7 @@ function accountEnvironment(accountId: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
     CLOUDFLARE_ACCOUNT_ID: accountId,
-    CLOUDFLARE_AUTH_USE_KEYRING: "true",
+    // CLOUDFLARE_AUTH_USE_KEYRING: "true",
   };
 }
 
@@ -374,7 +374,7 @@ export class CloudflareClient {
     try {
       await runWrangler(
         this.runner,
-        ["login", "--use-keyring", "--scopes", ...OAUTH_SCOPES],
+        ["login", "--scopes", ...OAUTH_SCOPES],
         {interactive: true},
       );
     } catch (error) {
@@ -397,7 +397,6 @@ export class CloudflareClient {
         {
           env: {
             ...process.env,
-            CLOUDFLARE_AUTH_USE_KEYRING: "true",
           },
           interactive: true,
         },
